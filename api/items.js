@@ -6,7 +6,8 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
     try {
-        const result = await ItemsService.getAllItems();
+        const { offset, limit, ...options } = req.query;
+        const result = await ItemsService.getAllItems(parseInt(offset), parseInt(limit), options);
         if (result.length === 0) {
             return res.status(404).send("items not found");
         };
@@ -102,5 +103,6 @@ router.delete("/:id", async (req, res) => {
         return res.status(500).send(err.message);
     }
 });
+
 
 module.exports = router;

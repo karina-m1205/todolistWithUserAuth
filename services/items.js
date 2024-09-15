@@ -1,12 +1,19 @@
 const itemsModel = require("../models/items.js");
 
 class ItemsService {
-    constructor() {
-        //initializes the instance
-    }
 
-    static async getAllItems() {
-        const result = await itemsModel.find({});
+    static async getAllItems(offset, limit, options = {}) {
+        if (!isFinite(offset)) {
+            throw new Error("invalid offset");
+        };
+        if (!isFinite(limit)) {
+            throw new Error("invalid limit");
+        };
+
+        const result = await itemsModel.find({})
+            .skip(offset)
+            .limit(limit)
+            .exec();
         return result; //return [] if not found item
     };
 
@@ -73,6 +80,13 @@ class ItemsService {
         const result = await itemsModel.findByIdAndDelete(id);
         return result; //return null if not found item
     };
+
+
+    //classwork
+    //function arguments categorization
+    //1. required arguments (mandatory)
+    //2. optional arguments (default values)
+
 }
 
 module.exports = ItemsService;
