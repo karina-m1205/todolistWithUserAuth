@@ -4,10 +4,14 @@ class ItemsService {
 
     static async getAllItems(offset, limit, options = {}) {
         if (!isFinite(offset)) {
-            throw new Error("invalid offset");
+            const err = new Error("invalid offset");
+            err.code = 400;
+            throw err;
         };
         if (!isFinite(limit)) {
-            throw new Error("invalid limit");
+            const err = new Error("invalid limit");
+            err.code = 400;
+            throw err;
         };
 
         const result = await itemsModel.find({})

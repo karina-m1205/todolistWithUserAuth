@@ -13,6 +13,9 @@ router.get("/", async (req, res) => {
         };
         return res.status(200).send(result);
     } catch (err) {
+        if(err.code = 400){
+            return res.status(err.code).send(err.message);
+        };
         return res.status(500).send(err.message);
     }
 });
