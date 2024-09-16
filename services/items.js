@@ -1,18 +1,12 @@
 const itemsModel = require("../models/items.js");
+const { TitleInUse, ItemExists, } = require("../core/customError.js");
+const { isFiniteOffset, isFiniteLimit, isIdValid, isTitleValid } = require("../core/validators.js");
 
 class ItemsService {
 
     static async getAllItems(offset, limit, options = {}) {
-        if (!isFinite(offset)) {
-            const err = new Error("invalid offset");
-            err.code = 400;
-            throw err;
-        };
-        if (!isFinite(limit)) {
-            const err = new Error("invalid limit");
-            err.code = 400;
-            throw err;
-        };
+        isFiniteOffset(offset);
+        isFiniteLimit(limit);
 
         const result = await itemsModel.find({})
             .skip(offset)
@@ -22,27 +16,18 @@ class ItemsService {
     };
 
     static async getItemById(id) {
-        if (!id || id.trim() === "") {
-            const err = new Error("item's id is required");
-            err.code = 400;
-            throw err;
-        };
+        isIdValid(id);
+
         const result = await itemsModel.findById(id);
         return result; //return null if not found item
     };
 
     static async createItem(title) {
-        if (typeof title !== "string" || title.trim() === "") {
-            const err = new Error("item's title required and must be a string");
-            err.code = 400;
-            throw err;
-        };
+        isTitleValid(title);
 
         const foundItem = await itemsModel.findOne({ title: title }); //return null if item not found
         if (foundItem) {
-            const err = new Error("item already exists");
-            err.code = 409;
-            throw err;
+            throw new ItemExists();
         };
         const result = new itemsModel({
             title: title,
@@ -53,33 +38,19 @@ class ItemsService {
     };
 
     static async updateItemById(id, title) {
-        if (!id || id.trim() === "") {
-            const err = new Error("item's id is required");
-            err.code = 400;
-            throw err;
-        };
-        if (typeof title !== "string" || title.trim() === "") {
-            const err = new Error("item's title required and must be a string");
-            err.code = 400;
-            throw err;
-        };
+        isIdValid(id);
+        isTitleValid(title);
 
         const foundTitle = await itemsModel.findOne({ title: title });
         if (foundTitle) {
-            const err = new Error("this title is already in use. choose another one");
-            err.code = 409;
-            throw err;
+            throw new TitleInUse();
         };
         const result = await itemsModel.findByIdAndUpdate(id, { title: title }, { new: true });
         return result; //return null if not found item
     };
 
     static async deleteItemById(id) {
-        if (!id || id.trim() === "") {
-            const err = new Error("item's id is required");
-            err.code = 400;
-            throw err;
-        };
+        isIdValid(id);
 
         const result = await itemsModel.findByIdAndDelete(id);
         return result; //return null if not found item
